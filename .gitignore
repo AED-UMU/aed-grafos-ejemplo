@@ -1,0 +1,6 @@
+.venv/
+build/
+rutas
+data/*.graph
+__pycache__/
+cache
