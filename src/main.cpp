@@ -130,19 +130,30 @@ public:
         std::reverse(ruta.begin(), ruta.end());
 
         double distancia_total = 0.0;
+        double distancia_calle = 0.0;
         std::cout << std::fixed << std::setprecision(1);
         std::cout << "Tiempo estimado: " << tiempos[destino] / 60.0 << " min\n";
         std::cout << "Ruta de calles:\n";
         std::string calle_anterior;
+        bool primera_calle = true;
         for (std::size_t i = 1; i < ruta.size(); ++i) {
             const Arco* arco = arco_anterior[ruta[i]];
             if (arco == nullptr) continue;
             distancia_total += arco->distancia;
             const std::string nombre = arco->calle.empty() ? "calle sin nombre" : arco->calle;
             if (nombre != calle_anterior) {
-                std::cout << "  " << nombre << "\n";
+                if (!primera_calle) {
+                    std::cout << " (" << distancia_calle / 1000.0 << " km)\n";
+                }
+                std::cout << "  " << nombre;
                 calle_anterior = nombre;
+                distancia_calle = 0.0;
+                primera_calle = false;
             }
+            distancia_calle += arco->distancia;
+        }
+        if (!primera_calle) {
+            std::cout << " (" << distancia_calle / 1000.0 << " km)\n";
         }
         std::cout << "Distancia total: " << distancia_total / 1000.0 << " km\n";
     }
