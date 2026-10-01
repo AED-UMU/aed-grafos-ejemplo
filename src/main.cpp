@@ -4,7 +4,6 @@
 #include <iomanip>
 #include <iostream>
 #include <limits>
-#include <queue>
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
@@ -88,27 +87,32 @@ public:
 
     void dijkstra(int origen, int destino) const {
         const double infinito = std::numeric_limits<double>::infinity();
-        std::vector<double> tiempos(nodos_.size(), infinito);
-        std::vector<int> anterior(nodos_.size(), -1);
-        std::vector<const Arco*> arco_anterior(nodos_.size(), nullptr);
-        using Estado = std::pair<double, int>;
-        std::priority_queue<Estado, std::vector<Estado>, std::greater<Estado>> cola;
+        const int n = static_cast<int>(nodos_.size());
+        std::vector<double> tiempos(n, infinito);
+        std::vector<int> anterior(n, -1);
+        std::vector<const Arco*> arco_anterior(n, nullptr);
+        std::vector<bool> visitado(n, false);
 
         tiempos[origen] = 0.0;
-        cola.push({0.0, origen});
-        while (!cola.empty()) {
-            const auto [tiempo_actual, actual] = cola.top();
-            cola.pop();
-            if (tiempo_actual > tiempos[actual]) continue;
+        for (int i = 0; i < n; ++i) {
+            int actual = -1;
+            double mejor_tiempo = infinito;
+            for (int v = 0; v < n; ++v) {
+                if (!visitado[v] && tiempos[v] < mejor_tiempo) {
+                    mejor_tiempo = tiempos[v];
+                    actual = v;
+                }
+            }
+            if (actual == -1) break;
+            visitado[actual] = true;
             if (actual == destino) break;
 
             for (const Arco& arco : adyacencia_[actual]) {
-                const double alternativa = tiempo_actual + arco.tiempo;
-                if (alternativa < tiempos[arco.destino]) {
+                const double alternativa = tiempos[actual] + arco.tiempo;
+                if (!visitado[arco.destino] && alternativa < tiempos[arco.destino]) {
                     tiempos[arco.destino] = alternativa;
                     anterior[arco.destino] = actual;
                     arco_anterior[arco.destino] = &arco;
-                    cola.push({alternativa, arco.destino});
                 }
             }
         }
